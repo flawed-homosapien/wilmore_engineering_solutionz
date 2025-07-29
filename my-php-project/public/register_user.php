@@ -1,4 +1,11 @@
-<?php
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container py-5">
+    <?php
 session_start();
 require_once __DIR__ . '/../src/db.php'; // Adjust this path as needed
 $pdo = getPDO(); // 🔧 This creates the PDO connection
@@ -35,15 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
-
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Registration</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container py-5">
     <h1>Register</h1>
 
     <?php if (isset($_SESSION['error'])): ?>
