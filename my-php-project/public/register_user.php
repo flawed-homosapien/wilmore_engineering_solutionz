@@ -1,0 +1,84 @@
+<?php
+session_start();
+require_once __DIR__ . '/../src/db.php'; // Adjust this path as needed
+$pdo = getPDO(); // 🔧 This creates the PDO connection
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $first_name = trim($_POST['first_name']);
+    $last_name  = trim($_POST['last_name']);
+    $email      = trim($_POST['email']);
+    $pass   = $_POST['password'];
+    $confirm    = $_POST['confirm'];
+
+    if ($pass !== $confirm) {
+        $_SESSION['error'] = "Passwords do not match.";
+    } else {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+
+        if ($stmt->fetch()) {
+            $_SESSION['error'] = "Email already registered.";
+        } else {
+            $hash = password_hash($pass, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$first_name, $last_name, $email, $hash]);
+            $_SESSION['success'] = "Registration successful. Please login.";
+            header('Location: login.php');
+
+            // After successful insert
+            $_SESSION['success'] = "Registration successful! Please log in to activate your account.";
+            header('Location: login.php');
+            exit();
+        }
+    }
+}
+
+?>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container py-5">
+    <h1>Register</h1>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']) ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+
+    <form method="post">
+        <div class="mb-3">
+            <label>First Name</label>
+            <input type="text" name="first_name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Last Name</label>
+            <input type="text" name="last_name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Confirm Password</label>
+            <input type="password" name="confirm" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+        <a href="login.php" class="btn btn-link">Login</a>
+    </form>
+</body>
+</html>
